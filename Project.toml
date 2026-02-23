@@ -1,0 +1,24 @@
+name = "SugarCubes"
+uuid = "86f71aa2-667a-4c36-857d-1339355300f4"
+version = "0.1.0"
+authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
+
+[deps]
+JuliaSyntax = "70703baa-626e-46a2-a12c-08ffd08c73b4"
+
+[sources]
+JuliaSyntax = {path = "sources/JuliaSyntax"}
+Meringues = {url = "https://github.com/wookay/Meringues.jl", rev = "main"}
+
+[compat]
+JuliaSyntax = "2.0"
+Meringues = "0.1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Jive = "ba5e3d4b-8524-549f-bc71-e76ad9e9deed"
+Meringues = "6079b36c-07e4-4b27-befa-fa40dd5f0e5c"
+
+[targets]
+test = ["Test", "Pkg", "Jive", "Meringues"]
