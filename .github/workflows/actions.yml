@@ -1,0 +1,37 @@
+# https://github.com/julia-actions/cache#usage
+name: CI
+
+on:
+  push:
+    paths-ignore:
+      - README.md
+      - 'docs/**'
+  pull_request:
+
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  Test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        julia-version: [nightly]
+        julia-arch: [x64]
+        os: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: julia-actions/setup-julia@v1
+      with:
+        version: ${{ matrix.julia-version }}
+    - uses: julia-actions/cache@v1
+    - name: sources
+      run: |
+        git clone --depth=1 --filter=blob:none --sparse https://github.com/JuliaLang/julia sources
+        cd sources
+        git sparse-checkout set JuliaSyntax Compiler
+        cd ../
+    - uses: julia-actions/julia-buildpkg@v1
+    - uses: julia-actions/julia-runtest@v1

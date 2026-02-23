@@ -3,7 +3,7 @@ using Pkg # Pkg.devdir
 using SugarCubes # @code_block
 using Meringues # ≈
 
-src_path = normpath(Pkg.devdir(), "TestJuliaLowering/sources/Compiler/src/abstractinterpretation.jl")
+src_path = normpath(@__DIR__, "../../sources/Compiler/src/abstractinterpretation.jl")
 src_block = @code_block src_path function typeinf_local(interp::AbstractInterpreter, frame::InferenceState, nextresult::CurrentState) end
 @test isfile(src_path)
 @test src_block.filepath == src_path
