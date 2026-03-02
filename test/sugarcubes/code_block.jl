@@ -1,3 +1,5 @@
+module test_sugarcubes_code_block
+
 using Test
 using Pkg # Pkg.devdir
 using SugarCubes # @code_block
@@ -14,3 +16,5 @@ dst_block = CodeBlock(dst_path, :(function typeinf_local(interp::FemtoInterprete
 @test isfile(dst_path)
 @test dst_block.filepath == dst_path
 @test dst_block.signature ≈ :(function typeinf_local(interp::FemtoInterpreter, frame::InferenceState, nextresult::CurrentState) end)
+
+end # module test_sugarcubes_code_block
