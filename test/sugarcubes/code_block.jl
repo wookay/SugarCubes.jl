@@ -11,10 +11,10 @@ src_block = @code_block src_path function typeinf_local(interp::AbstractInterpre
 @test src_block.filepath == src_path
 @test src_block.signature ≈ :(function typeinf_local(interp::AbstractInterpreter, frame::InferenceState, nextresult::CurrentState) end)
 
-dst_path = normpath(Pkg.devdir(), "FemtoCompiler/ext/abstractinterpretation.jl")
-dst_block = CodeBlock(dst_path, :(function typeinf_local(interp::FemtoInterpreter, frame::InferenceState, nextresult::CurrentState) end))
-@test isfile(dst_path)
-@test dst_block.filepath == dst_path
-@test dst_block.signature ≈ :(function typeinf_local(interp::FemtoInterpreter, frame::InferenceState, nextresult::CurrentState) end)
+dest_path = normpath(Pkg.devdir(), "FemtoCompiler/ext/abstractinterpretation.jl")
+dest_block = CodeBlock(dest_path, :(function typeinf_local(interp::FemtoInterpreter, frame::InferenceState, nextresult::CurrentState) end))
+@test isfile(dest_path)
+@test dest_block.filepath == dest_path
+@test dest_block.signature ≈ :(function typeinf_local(interp::FemtoInterpreter, frame::InferenceState, nextresult::CurrentState) end)
 
 end # module test_sugarcubes_code_block
