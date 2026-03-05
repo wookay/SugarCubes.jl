@@ -1,4 +1,4 @@
-# module test_sugarcubes_femtocompier_typeinf_code
+module test_sugarcubes_femtocompier_typeinf_code
 
 using Test
 using Pkg # Pkg.devdir
@@ -17,7 +17,8 @@ dest_block = code_block_with(; filepath = dest_path, signature = dest_signature)
 
 using SugarCubes: get_func_block
 dest_range = get_func_block(dest_block)
+@test dest_range !== nothing
 
 @test has_diff(src_block, dest_block) === false
 
-# end # module test_sugarcubes_femtocompier_typeinf_code
+end # module test_sugarcubes_femtocompier_typeinf_code

@@ -1,8 +1,8 @@
 # module SugarCubes
 
 using JuliaSyntax: JuliaSyntax as JS
-using .JS: SyntaxTree, parseall, parsestmt, @K_str
 
+# export CodeBlock
 struct CodeBlock
     code::String
     filename::String
@@ -13,6 +13,7 @@ struct CodeBlock
     end
 end
 
+# export code_block_with
 function code_block_with(; filepath::String, signature::Expr)::CodeBlock
     code = read(filepath, String)
     filename = basename(filepath)
@@ -41,6 +42,7 @@ function get_lines(code::String, range::UnitRange{Int})::String
     join(split(code, LF)[range], LF)
 end
 
+# export has_diff
 function has_diff(src_block::CodeBlock, dest_block::CodeBlock)::Bool
     src_range = get_func_block(src_block)
     dest_range = get_func_block(dest_block)

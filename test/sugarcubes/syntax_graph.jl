@@ -1,3 +1,5 @@
+module test_sugarcubes_syntax_graph
+
 using Test
 using JuliaSyntax: JuliaSyntax as JS
 using .JS: SourceFile
@@ -40,3 +42,5 @@ SyntaxNode:
 [function]
   foo                                    :: Identifier
 """
+
+end # module test_sugarcubes_syntax_graph
