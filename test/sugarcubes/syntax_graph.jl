@@ -4,7 +4,6 @@ using Test
 using JuliaSyntax: JuliaSyntax as JS
 using .JS: SourceFile
 using .JS: parsestmt, sourcefile, filename, source_location, source_line, sourcetext, highlight
-using Meringues # ≈
 
 # from  julia/JuliaSyntax/test/syntax_graph.jl
 using .JS: SyntaxTree
@@ -23,7 +22,7 @@ t = parsestmt(SyntaxNode, "function foo end")
 @test source_location(t) == (1, 1)
 @test source_line(t) == 1
 @test sourcetext(t) == "function foo end"
-@test to_expr(t) ≈ :(function foo end)
+@test to_expr(t) == :(function foo end)
 
 # show(stdout, MIME("text/plain"), t, show_location=true)
 
