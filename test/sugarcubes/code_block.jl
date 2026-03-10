@@ -36,4 +36,18 @@ dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
 @test has_diff(src_block1, dest_block) === false
 @test has_diff(src_block2, dest_block) === true
 
+dest_code2 = """
+if VERSION >= v"1.12"
+function f(x::Int, y::Int)
+end
+function f(x::MyInt, y::Int)
+    xs + 2
+end
+end
+"""
+dest_signature2 = :(if VERSION >= v"1.12" function f(x::MyInt, y::Int) end end)
+dest_block2 = CodeBlock(dest_code2, "dest_code2.jl", dest_signature2)
+
+@test has_diff(src_block2, dest_block2) === false
+
 end # module test_sugarcubes_code_block

@@ -1,6 +1,7 @@
 # module SugarCubes
 
 using JuliaSyntax: JuliaSyntax as JS
+using .JS: Kind, @K_str
 
 # from julia/base/expr.jl  remove_linenums!(@nospecialize ex)
 function remove_linenums_in_macrocall!(ex::Expr)
@@ -23,14 +24,29 @@ function remove_linenums_in_macrocall!(ex::Expr)
     return ex
 end
 
+struct Signature
+    kind::Kind
+    func::Expr
+end
+
+function to_signature(sig::Expr)::Signature
+    remove_linenums_in_macrocall!(sig)
+    if sig.head === :function
+        Signature(K"function", sig)
+    elseif sig.head === :if
+        Signature(K"if", sig.args[2].args[1])
+    else
+        Signature(K"error", Expr(:error))
+    end
+end
+
 # export CodeBlock
 struct CodeBlock
     code::String
     filename::String
-    signature::Expr
-    function CodeBlock(code::String, filename::String, signature::Expr)
-        remove_linenums_in_macrocall!(signature)
-        new(code, filename, signature)
+    signature::Signature
+    function CodeBlock(code::String, filename::String, sig::Expr)
+        new(code, filename, to_signature(sig))
     end
 end
 
@@ -41,20 +57,35 @@ function code_block_with(; filepath::String, signature::Expr)::CodeBlock
     CodeBlock(code, filename, signature)
 end
 
+function matched_lines(sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}}
+    sub_args1 = sub.args[1]
+    if sub_args1.head === :call && sub_args1.args[1] === sig_func.args[1].args[1]
+        remove_linenums_in_macrocall!(sub_args1)
+        if sub_args1 == sig_func.args[1]
+            start_line = sub.args[2].args[2].line
+            end_line = sub.args[2].args[end-1].line
+            return start_line:end_line
+        end
+    end
+    return nothing
+end
+
 function get_func_block(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
     expr = JS.fl_parseall(Expr, code_block.code; filename = code_block.filename)
     for sub in expr.args
-        if sub isa Expr && sub.head === :function
-            sub_args1 = sub.args[1]
-            if sub_args1.head === :call && sub_args1.args[1] === code_block.signature.args[1].args[1]
-                remove_linenums_in_macrocall!(sub_args1)
-                if sub_args1 == code_block.signature.args[1]
-                    start_line = sub.args[2].args[2].line
-                    end_line = sub.args[2].args[end-1].line
-                    return start_line:end_line
-                end
-            end
-        end
+        if code_block.signature.kind === K"function" && sub isa Expr && sub.head === :function
+            matched = matched_lines(sub, code_block.signature.func)
+            matched isa UnitRange{Int} && return matched
+        elseif code_block.signature.kind === K"if" && sub isa Expr && sub.head === :if
+            if sub.args[2].head === :block
+                for sub_func in sub.args[2].args
+                    if sub_func isa Expr && sub_func.head === :function
+                        matched = matched_lines(sub_func, code_block.signature.func)
+                        matched isa UnitRange{Int} && return matched
+                    end
+                end # for
+            end # if
+        end # if
     end
     return nothing
 end
