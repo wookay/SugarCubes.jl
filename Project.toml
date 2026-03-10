@@ -8,17 +8,14 @@ JuliaSyntax = "70703baa-626e-46a2-a12c-08ffd08c73b4"
 
 [sources]
 JuliaSyntax = {path = "sources/JuliaSyntax"}
-FemtoCompiler = {url = "https://github.com/wookay/FemtoCompiler.jl", rev = "main"}
 
 [compat]
 JuliaSyntax = "2.0"
-FemtoCompiler = "0.1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Jive = "ba5e3d4b-8524-549f-bc71-e76ad9e9deed"
-FemtoCompiler = "92d42091-2d14-46a9-a897-febf9702e17e"
 
 [targets]
-test = ["Test", "Pkg", "Jive", "FemtoCompiler"]
+test = ["Test", "Pkg", "Jive"]

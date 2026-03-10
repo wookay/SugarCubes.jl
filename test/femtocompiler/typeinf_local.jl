@@ -1,4 +1,4 @@
-module test_sugarcubes_femtocompier_typeinf_local
+module test_femtocompiler_typeinf_local
 
 using Test
 using Pkg # Pkg.devdir
@@ -24,4 +24,4 @@ dest_range = get_func_block(dest_block)
 
 @test has_diff(src_block, dest_block) === false
 
-end # module test_sugarcubes_femtocompier_typeinf_local
+end # module test_femtocompiler_typeinf_local
