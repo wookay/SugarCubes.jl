@@ -80,8 +80,20 @@ function matched_lines(sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}
     return nothing
 end
 
+expr_cache::Dict{UInt64, Expr} = Dict{Int64, Expr}()
+function get_parsed_expr(code_block::CodeBlock)::Expr
+    cache_key::UInt64 = hash(code_block.code)
+    if haskey(expr_cache, cache_key)
+        expr_cache[cache_key]
+    else
+        ex::Expr = JS.fl_parseall(Expr, code_block.code; filename = code_block.filename)
+        expr_cache[cache_key] = ex
+        ex
+    end
+end
+
 function get_func_block(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
-    expr = JS.fl_parseall(Expr, code_block.code; filename = code_block.filename)
+    expr::Expr = get_parsed_expr(code_block)
     for sub in expr.args
         if code_block.signature.kind === K"function" && sub isa Expr && sub.head === :function
             matched = matched_lines(sub, code_block.signature.func)
