@@ -34,7 +34,17 @@ function to_signature(sig::Expr)::Signature
     if sig.head === :function
         Signature(K"function", sig)
     elseif sig.head === :if
-        Signature(K"if", sig.args[2].args[1])
+        if isempty(sig.args[2].args)
+            if sig.args[3].head === :elseif
+                Signature(K"elseif", sig.args[3].args[2].args[1])
+            else
+                Signature(K"else", sig.args[3].args[1])
+            end
+        else
+            Signature(K"if", sig.args[2].args[1])
+        end
+    elseif sig.head === :module
+        Signature(K"module", sig.args[4].args[1])
     else
         Signature(K"error", Expr(:error))
     end
@@ -59,7 +69,7 @@ end
 
 function matched_lines(sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}}
     sub_args1 = sub.args[1]
-    if sub_args1.head === :call && sub_args1.args[1] === sig_func.args[1].args[1]
+    if sub_args1 isa Expr && sub_args1.head === :call && sub_args1.args[1] === sig_func.args[1].args[1]
         remove_linenums_in_macrocall!(sub_args1)
         if sub_args1 == sig_func.args[1]
             start_line = sub.args[2].args[2].line
@@ -83,10 +93,63 @@ function get_func_block(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
                         matched = matched_lines(sub_func, code_block.signature.func)
                         matched isa UnitRange{Int} && return matched
                     end
-                end # for
+                end # for sub_func
             end # if
+        elseif code_block.signature.kind === K"elseif" && sub isa Expr && sub.head === :if
+            for sub_arg in sub.args
+                if sub_arg.head === :elseif
+                    for sub_else in sub_arg.args
+                        if sub_else.head === :block
+                            for sub_func in sub_else.args
+                                if sub_func isa Expr && sub_func.head === :function
+                                    matched = matched_lines(sub_func, code_block.signature.func)
+                                    matched isa UnitRange{Int} && return matched
+                                end
+                            end # for sub_func
+                        elseif sub_else.head === :elseif
+                            for sub_func in sub_else.args[2].args
+                                if sub_func isa Expr && sub_func.head === :function
+                                    matched = matched_lines(sub_func, code_block.signature.func)
+                                    matched isa UnitRange{Int} && return matched
+                                end
+                            end # for sub_func
+                        end # if
+                    end # for sub_else
+                end # if
+            end # for sub_arg
+        elseif code_block.signature.kind === K"else" && sub isa Expr && sub.head === :if
+            for sub_else in sub.args[3:end]
+                if sub_else.head === :block
+                    for sub_func in sub_else.args
+                        if sub_func isa Expr && sub_func.head === :function
+                            matched = matched_lines(sub_func, code_block.signature.func)
+                            matched isa UnitRange{Int} && return matched
+                        end
+                    end # for sub_func
+                end # if
+            end # for sub_else
+        elseif code_block.signature.kind === K"module" && sub isa Expr
+            for sub_arg in sub.args
+                if sub_arg isa Expr
+                    if sub_arg.head === :module
+                        for sub_func in sub_arg.args[3].args
+                            if sub_func isa Expr && sub_func.head === :function
+                                matched = matched_lines(sub_func, code_block.signature.func)
+                                matched isa UnitRange{Int} && return matched
+                            end
+                        end # for sub_func
+                    elseif sub_arg.head === :block
+                        for sub_func in sub_arg.args
+                            if sub_func isa Expr && sub_func.head === :function
+                                matched = matched_lines(sub_func, code_block.signature.func)
+                                matched isa UnitRange{Int} && return matched
+                            end
+                        end # for sub_func
+                    end # if
+                end # if
+            end # for sub_arg
         end # if
-    end
+    end # for sub
     return nothing
 end
 

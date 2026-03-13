@@ -2,7 +2,9 @@ module test_sugarcubes_code_block
 
 using Test
 using SugarCubes
+using SugarCubes: get_func_block
 
+#=
 src_code1 = """
 function f(x::Int, y::Int)
     xs
@@ -53,5 +55,59 @@ dest_block3 = CodeBlock(dest_code2, "dest_code2.jl", dest_signature3)
 
 @test has_diff(src_block2, dest_block2) === false
 @test has_diff(src_block2, dest_block3) === true
+=#
+
+dest_code3 = """
+if VERSION >= v"1.13.0-DEV.620"
+elseif VERSION >= v"1.11.0"
+function f(x::Int, y::Int)
+    xs + 2
+end
+function f(x::MyInt, y::Int)
+    xs + 3
+end
+end
+"""
+dest_signature3 = :(if VERSION >= v"1.13.0-DEV.620" elseif VERSION >= v"1.11.0" function f(x::MyInt, y::Int) end end)
+dest_block3 = CodeBlock(dest_code3, "dest_code3.jl", dest_signature3)
+
+dest_range = get_func_block(dest_block3)
+@test dest_range !== nothing
+
+dest_code3 = """
+if VERSION >= v"1.13.0-DEV.620"
+elseif VERSION >= v"1.12.0-DEV.901"
+elseif VERSION >= v"1.11.0"
+function f(x::Int, y::Int)
+    xs + 2
+end
+function f(x::MyInt, y::Int)
+    xs + 3
+end
+end
+"""
+dest_signature3 = :(if VERSION >= v"1.13.0-DEV.620" elseif VERSION >= v"1.11.0" function f(x::MyInt, y::Int) end end)
+dest_block3 = CodeBlock(dest_code3, "dest_code3.jl", dest_signature3)
+
+dest_range = get_func_block(dest_block3)
+@test dest_range !== nothing
+
+dest_code4 = """
+if VERSION >= v"1.13.0-DEV.620"
+else
+function f(x::Int, y::Int)
+    xs + 2
+end
+function f(x::MyInt, y::Int)
+    xs + 3
+end
+end
+"""
+dest_signature4 = :(if VERSION >= v"1.13.0-DEV.620" else function f(x::MyInt, y::Int) end end)
+dest_block4 = CodeBlock(dest_code4, "dest_code4.jl", dest_signature4)
+
+using SugarCubes: get_func_block
+dest_range = get_func_block(dest_block4)
+@test dest_range !== nothing
 
 end # module test_sugarcubes_code_block
