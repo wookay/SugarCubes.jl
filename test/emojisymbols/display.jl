@@ -1,5 +1,4 @@
-using Jive
-@If VERSION >= v"1.14-DEV" module test_emojisymbols_display
+module test_emojisymbols_display
 
 using Test
 using Pkg # Pkg.devdir

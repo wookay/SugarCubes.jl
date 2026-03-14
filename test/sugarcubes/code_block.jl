@@ -149,6 +149,6 @@ src_block5 = CodeBlock(src_code5, "src_code5.jl", src_signature5)
 dest_signature5 = :(module TestExt if VERSION >= v"1.14.0-DEV.1453" elseif VERSION >= v"1.11" macro test(ex, kws::Expr...) end end end)
 dest_block5 = CodeBlock(dest_code5, "dest_code5.jl", dest_signature5)
 @test has_diff(src_block5, dest_block5)
-@test has_diff(src_block5, dest_block5; skip_lines = [-6]) === false
+@test has_diff(src_block5, dest_block5; skip_lines = (src = [-6], dest = [-6])) === false
 
 end # module test_sugarcubes_code_block

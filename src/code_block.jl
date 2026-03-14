@@ -117,13 +117,18 @@ function get_func_block(code_expr::Expr, layers::Vector{SigLayer}, depth::Int)::
     elseif kind === K"macro"
         if code_expr.head === :block
             for sub_macro in code_expr.args
-                if sub_macro isa Expr && sub_macro.head === :macrocall
-                    for sub_block in sub_macro.args
-                        if sub_block isa Expr && sub_block.head === :macro
-                            matched = matched_lines(sub_block, sig_expr)
-                            matched isa UnitRange{Int} && return matched
-                        end
-                    end # for sub_block
+                if sub_macro isa Expr
+                    if sub_macro.head === :macro
+                        matched = matched_lines(sub_macro, sig_expr)
+                        matched isa UnitRange{Int} && return matched
+                    elseif sub_macro.head === :macrocall
+                        for sub_block in sub_macro.args
+                            if sub_block isa Expr && sub_block.head === :macro
+                                matched = matched_lines(sub_block, sig_expr)
+                                matched isa UnitRange{Int} && return matched
+                            end
+                        end # for sub_block
+                    end # if
                 end # if
             end # for sub_macro
         elseif code_expr.head === :macro
@@ -163,12 +168,15 @@ function get_func_block(code_expr::Expr, layers::Vector{SigLayer}, depth::Int)::
                 end
             elseif kind === K"module"
                 if sub.head === :macrocall
-                    for sub_block in sub.args
-                        if sub_block isa Expr && sub_block.head === :module
-                            matched = get_func_block(sub_block, layers, depth + 1)
-                            matched isa UnitRange{Int} && return matched
+                    for sub_module in sub.args
+                        if sub_module isa Expr && sub_module.head === :module
+                            sub_block = sub_module.args[end]
+                            if sub_block isa Expr && sub_block.head === :block
+                                matched = get_func_block(sub_block, layers, depth + 1)
+                                matched isa UnitRange{Int} && return matched
+                            end
                         end # if
-                    end # for sub_block
+                    end # for sub_module
                 elseif sub.head === :module
                     for sub_block in sub.args
                         if sub_block isa Expr && sub_block.head === :block
@@ -217,15 +225,15 @@ function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})
 end
 
 # export has_diff
-function has_diff(src_block::CodeBlock, dest_block::CodeBlock; skip_lines::Vector{Int} = Int[])::Bool
+function has_diff(src_block::CodeBlock, dest_block::CodeBlock; skip_lines::@NamedTuple{src::Vector{Int}, dest::Vector{Int}} = (src = Int[], dest = Int[]))::Bool
     src_range = get_func_block(src_block)
     dest_range = get_func_block(dest_block)
     if src_range === nothing || dest_range === nothing
         throw(CodeBlockError(string("src: ", src_range, ", dest: ", dest_range)))
         return false
     else
-        src_code = get_lines(src_block.code, src_range, skip_lines)
-        dest_code = get_lines(dest_block.code, dest_range, skip_lines)
+        src_code = get_lines(src_block.code, src_range, skip_lines.src)
+        dest_code = get_lines(dest_block.code, dest_range, skip_lines.dest)
         return src_code != dest_code
     end
 end

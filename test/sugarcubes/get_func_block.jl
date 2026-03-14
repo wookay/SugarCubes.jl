@@ -44,6 +44,20 @@ src_block = CodeBlock(src_code, "src_code.jl", src_signature)
 @test get_func_block(src_block) == 3:3
 
 src_code = """
+"doc"
+module Test
+
+macro test(ex, kws...)
+    xs
+end
+
+end # module
+"""
+src_signature = :(module Test macro test(ex, kws...) end end)
+src_block = CodeBlock(src_code, "src_code.jl", src_signature)
+@test get_func_block(src_block) == 5:5
+
+src_code = """
 module Test
 "doc"
 macro test(ex, kws...)
