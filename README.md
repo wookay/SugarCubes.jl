@@ -5,3 +5,4 @@
 ### Examples
   - 🛣️ FemtoCompiler.jl  https://github.com/wookay/FemtoCompiler.jl/blob/main/gen/check_for_updates_using_sugar_cubes.jl
   - 🤔 EmojiSymbols.jl  https://github.com/wookay/EmojiSymbols.jl/blob/master/gen/check_for_updates_using_sugar_cubes.jl
+  - 👣 Jive.jl  https://github.com/wookay/Jive.jl/blob/master/gen/check_for_updates_using_sugar_cubes.jl
