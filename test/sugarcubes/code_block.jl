@@ -150,5 +150,6 @@ dest_signature5 = :(module TestExt if VERSION >= v"1.14.0-DEV.1453" elseif VERSI
 dest_block5 = CodeBlock(dest_code5, "dest_code5.jl", dest_signature5)
 @test has_diff(src_block5, dest_block5)
 @test has_diff(src_block5, dest_block5; skip_lines = (src = [-6], dest = [-6])) === false
+@test has_diff(src_block5, dest_block5; skip_lines = (src = [4], dest = [4])) === false
 
 end # module test_sugarcubes_code_block
