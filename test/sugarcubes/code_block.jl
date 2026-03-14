@@ -4,7 +4,6 @@ using Test
 using SugarCubes
 using SugarCubes: get_func_block
 
-#=
 src_code1 = """
 function f(x::Int, y::Int)
     xs
@@ -34,6 +33,8 @@ end
 """
 dest_signature = :(function f(x::MyInt, y::Int) end)
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
+@test get_func_block(dest_block) == 2:2
+@test get_func_block(dest_block) == 2:2 # keep signature layers
 
 @test has_diff(src_block1, dest_block) === false
 @test has_diff(src_block2, dest_block) === true
@@ -55,7 +56,6 @@ dest_block3 = CodeBlock(dest_code2, "dest_code2.jl", dest_signature3)
 
 @test has_diff(src_block2, dest_block2) === false
 @test has_diff(src_block2, dest_block3) === true
-=#
 
 dest_code3 = """
 if VERSION >= v"1.13.0-DEV.620"
@@ -109,5 +109,46 @@ dest_block4 = CodeBlock(dest_code4, "dest_code4.jl", dest_signature4)
 using SugarCubes: get_func_block
 dest_range = get_func_block(dest_block4)
 @test dest_range !== nothing
+
+src_code5 = """
+module Test
+"doc"
+macro test(ex, kws...)
+    if true
+        if true
+        else
+            let _do = (length(broken) > 0 && esc(broken[1])) ? do_broken_test : do_test
+                _do(result, ex, ctx)
+            end
+        end
+    end
+    return result
+end # macro
+end # module
+"""
+dest_code5 = """
+module TestExt
+if VERSION >= v"1.14.0-DEV.1453"
+elseif VERSION >= v"1.11"
+macro test(ex, kws::Expr...)
+    if true
+        if true
+        else
+            let _do = (length(broken) > 0 && esc(broken[1])) ? do_broken_test_ext : do_test_ext
+                _do(result, ex, ctx)
+            end
+        end
+    end
+    return result
+end # macro
+end # if
+end # module
+"""
+src_signature5 = :(module Test macro test(ex, kws...) end end)
+src_block5 = CodeBlock(src_code5, "src_code5.jl", src_signature5)
+dest_signature5 = :(module TestExt if VERSION >= v"1.14.0-DEV.1453" elseif VERSION >= v"1.11" macro test(ex, kws::Expr...) end end end)
+dest_block5 = CodeBlock(dest_code5, "dest_code5.jl", dest_signature5)
+@test has_diff(src_block5, dest_block5)
+@test has_diff(src_block5, dest_block5; skip_lines = [-6]) === false
 
 end # module test_sugarcubes_code_block
