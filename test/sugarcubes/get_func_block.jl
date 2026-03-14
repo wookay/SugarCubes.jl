@@ -100,4 +100,17 @@ dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
 @test get_func_block(src_block) == 4:12
 @test get_func_block(dest_block) == 5:13
 
+dest_code = """
+if VERSION >= v"1.11.0-DEV.1432"
+    const compat_get_bool_env = Base.get_bool_env
+else
+    function parse_bool_env(name::String, val::String = ENV[name]; throw::Bool=false)::Union{Nothing, Bool}
+        xs
+    end
+end
+"""
+dest_signature = :(if VERSION >= v"1.11.0-DEV.1432" else function parse_bool_env(name::String, val::String = ENV[name]; throw::Bool=false)::Union{Nothing, Bool} end end)
+dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
+@test get_func_block(dest_block) == 5:5
+
 end # module test_sugarcubes_get_func_block

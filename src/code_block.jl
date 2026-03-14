@@ -84,8 +84,9 @@ end
 function matched_lines(sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}}
     sub_args1 = sub.args[1]
     sig_args1 = sig_func.args[1]
-    if sub_args1 isa Expr && sub_args1.head === :call &&
-        sig_args1 isa Expr && sig_args1.head === :call
+    if sub_args1 isa Expr && sig_args1 isa Expr &&
+        ((sub_args1.head === :call && sig_args1.head === :call) ||
+         (sub_args1.head === :(::) && sig_args1.head === :(::)))
         remove_linenums_in_macrocall!(sub_args1)
         if sub_args1 == sig_args1
             start_line = sub.args[2].args[2].line
@@ -161,7 +162,7 @@ function get_func_block(code_expr::Expr, layers::Vector{SigLayer}, depth::Int)::
                     end # for sub_elseif
                 end # if
             elseif kind === K"else"
-                sub_block = sub.args[3]
+                sub_block = sub.args[end]
                 if sub_block isa Expr && sub_block.head === :block
                     matched = get_func_block(sub_block, layers, depth + 1)
                     matched isa UnitRange{Int} && return matched
