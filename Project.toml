@@ -5,6 +5,7 @@ authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
 
 [deps]
 JuliaSyntax = "70703baa-626e-46a2-a12c-08ffd08c73b4"
+DeepDiffs = "ab62b9b5-e342-54a8-a765-a90f495de1a6"
 
 [sources]
 JuliaSyntax = {path = "sources/JuliaSyntax"}
@@ -12,6 +13,7 @@ JuliaSyntax = {path = "sources/JuliaSyntax"}
 [compat]
 julia = "1.12"
 JuliaSyntax = "2.0"
+DeepDiffs = "1.2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

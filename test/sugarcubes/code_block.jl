@@ -37,7 +37,7 @@ dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
 @test get_func_block(dest_block) == 2:2 # keep signature layers
 
 @test has_diff(src_block1, dest_block) === false
-@test has_diff(src_block2, dest_block) === true
+@test has_diff(src_block2, dest_block; show_diff = false) === true
 
 dest_code2 = """
 if VERSION >= v"1.12"
@@ -55,7 +55,7 @@ dest_signature3 = :(if VERSION >= v"1.12" function f(x::MyInt, y::Int) end end)
 dest_block3 = CodeBlock(dest_code2, "dest_code2.jl", dest_signature3)
 
 @test has_diff(src_block2, dest_block2) === false
-@test has_diff(src_block2, dest_block3) === true
+@test has_diff(src_block2, dest_block3; show_diff = false) === true
 
 dest_code3 = """
 if VERSION >= v"1.13.0-DEV.620"
@@ -148,7 +148,7 @@ src_signature5 = :(module Test macro test(ex, kws...) end end)
 src_block5 = CodeBlock(src_code5, "src_code5.jl", src_signature5)
 dest_signature5 = :(module TestExt if VERSION >= v"1.14.0-DEV.1453" elseif VERSION >= v"1.11" macro test(ex, kws::Expr...) end end end)
 dest_block5 = CodeBlock(dest_code5, "dest_code5.jl", dest_signature5)
-@test has_diff(src_block5, dest_block5)
+@test has_diff(src_block5, dest_block5; show_diff = false) === true
 @test has_diff(src_block5, dest_block5; skip_lines = (src = [-6], dest = [-6])) === false
 @test has_diff(src_block5, dest_block5; skip_lines = (src = [4], dest = [4])) === false
 

@@ -2,6 +2,7 @@
 
 using JuliaSyntax: JuliaSyntax as JS
 using .JS: Kind, @K_str
+using DeepDiffs: deepdiff
 
 # from julia/base/expr.jl  remove_linenums!(@nospecialize ex)
 function remove_linenums_in_macrocall!(ex::Expr)
@@ -226,7 +227,10 @@ function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})
 end
 
 # export has_diff
-function has_diff(src_block::CodeBlock, dest_block::CodeBlock; skip_lines::@NamedTuple{src::Vector{Int}, dest::Vector{Int}} = (src = Int[], dest = Int[]))::Bool
+function has_diff(src_block::CodeBlock,
+                 dest_block::CodeBlock ;
+                 show_diff::Bool = true,
+                 skip_lines::@NamedTuple{src::Vector{Int}, dest::Vector{Int}} = (src = Int[], dest = Int[]))::Bool
     src_range = get_func_block(src_block)
     dest_range = get_func_block(dest_block)
     if src_range === nothing || dest_range === nothing
@@ -235,7 +239,11 @@ function has_diff(src_block::CodeBlock, dest_block::CodeBlock; skip_lines::@Name
     else
         src_code = get_lines(src_block.code, src_range, skip_lines.src)
         dest_code = get_lines(dest_block.code, dest_range, skip_lines.dest)
-        return src_code != dest_code
+        result = src_code != dest_code
+        if result && show_diff
+            println(stdout, "\n", deepdiff(src_code, dest_code))
+        end
+        return result
     end
 end
 

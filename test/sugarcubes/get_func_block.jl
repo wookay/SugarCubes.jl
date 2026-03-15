@@ -113,4 +113,18 @@ dest_signature = :(if VERSION >= v"1.11.0-DEV.1432" else function parse_bool_env
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
 @test get_func_block(dest_block) == 5:5
 
+dest_code = """
+function bootstrap(io::IO)
+    let time() = ccall(:jl_clock_now, Float64, ())
+        println(io, "Compiling the femto compiler. This may take several minutes ...")
+        xs1
+        xs2
+    end
+    nothing
+end
+"""
+dest_signature = :(function bootstrap(io::IO) end)
+dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
+@test get_func_block(dest_block) == 2:7
+
 end # module test_sugarcubes_get_func_block
