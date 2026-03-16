@@ -1,34 +1,7 @@
 # module SugarCubes
 
-using JuliaSyntax: JuliaSyntax as JS
-using .JS: Kind, @K_str
-using DeepDiffs: deepdiff
-
-# from julia/base/expr.jl  remove_linenums!(@nospecialize ex)
-function remove_linenums_in_macrocall!(ex::Expr)
-    if ex.head === :block || ex.head === :quote
-        # remove line number expressions from metadata (not argument literal or inert) position
-        filter!(ex.args) do x
-            isa(x, Expr) && x.head === :line && return false
-            isa(x, LineNumberNode) && return false
-            return true
-        end
-    ### macrocall case
-    elseif ex.head === :macrocall
-        ex.args = map(ex.args) do subex
-            isa(subex, LineNumberNode) ? nothing : subex
-        end
-    end
-    for subex in ex.args
-        subex isa Expr && remove_linenums_in_macrocall!(subex)
-    end
-    return ex
-end
-
-const SigLayer = Tuple{Int, Kind, Expr}
-struct Signature
-    layers::Vector{SigLayer}
-end
+using .JS: @K_str
+using DeepDiffs: DeepDiffs
 
 function to_signature(expr::Expr, depth::Int = 1, layers::Vector{SigLayer} = SigLayer[])::Signature
     if depth == 1
@@ -63,23 +36,6 @@ function to_signature(expr::Expr, depth::Int = 1, layers::Vector{SigLayer} = Sig
         push!(layers, (depth, K"error", expr))
         Signature(layers)
     end
-end
-
-# export CodeBlock
-struct CodeBlock
-    code::String
-    filename::String
-    signature::Signature
-    function CodeBlock(code::String, filename::String, expr::Expr)
-        new(code, filename, to_signature(expr))
-    end
-end
-
-# export code_block_with
-function code_block_with(; filepath::String, signature::Expr)::CodeBlock
-    code = read(filepath, String)
-    filename = basename(filepath)
-    CodeBlock(code, filename, signature)
 end
 
 function matched_lines(sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}}
@@ -202,10 +158,6 @@ function get_func_block(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
     get_func_block(code_block, code_block.signature)
 end
 
-struct CodeBlockError <: Exception
-    msg::String
-end
-
 const LF = "\n"
 
 function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})::String
@@ -226,7 +178,21 @@ function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})
     end
 end
 
-# export has_diff
+"""
+    code_block_with(; filepath::String, signature::Expr)::CodeBlock
+"""
+function code_block_with(; filepath::String, signature::Expr)::CodeBlock
+    code = read(filepath, String)
+    filename = basename(filepath)
+    CodeBlock(code, filename, signature)
+end
+
+"""
+    has_diff(src_block::CodeBlock,
+             dest_block::CodeBlock ;
+             show_diff::Bool = true,
+             skip_lines::@NamedTuple{src::Vector{Int}, dest::Vector{Int}} = (src = Int[], dest = Int[]))::Bool
+"""
 function has_diff(src_block::CodeBlock,
                  dest_block::CodeBlock ;
                  show_diff::Bool = true,
@@ -241,7 +207,7 @@ function has_diff(src_block::CodeBlock,
         dest_code = get_lines(dest_block.code, dest_range, skip_lines.dest)
         result = src_code != dest_code
         if result && show_diff
-            println(stdout, "\n", deepdiff(src_code, dest_code))
+            println(stdout, "\n", DeepDiffs.deepdiff(src_code, dest_code))
         end
         return result
     end
