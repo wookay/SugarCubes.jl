@@ -16,10 +16,10 @@ dest_filepath = normpath(Pkg.devdir(), dest_path)
 src_block = code_block_with(; filepath = src_filepath, signature = src_signature)
 dest_block = code_block_with(; filepath = dest_filepath, signature = dest_signature)
 
-using SugarCubes: get_func_block
-src_range = get_func_block(src_block)
+using SugarCubes: get_func_block_range
+src_range = get_func_block_range(src_block)
 @test src_range !== nothing
-dest_range = get_func_block(dest_block)
+dest_range = get_func_block_range(dest_block)
 @test dest_range !== nothing
 
 @test has_diff(src_block, dest_block) === false

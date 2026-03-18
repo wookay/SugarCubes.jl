@@ -26,16 +26,17 @@ end
 struct CodeBlock
     code::String
     filename::String
-    signature::Signature
+    signature::Union{Nothing, Signature}
 end
 ```
 """
 struct CodeBlock
     code::String
     filename::String
-    signature::Signature
-    function CodeBlock(code::String, filename::String, expr::Expr)
-        new(code, filename, to_signature(expr))
+    signature::Union{Nothing, Signature}
+    function CodeBlock(code::String, filename::String, expr::Union{Nothing, Expr})
+        signature = expr === nothing ? nothing : to_signature(expr)
+        new(code, filename, signature)
     end
 end
 

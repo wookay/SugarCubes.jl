@@ -169,13 +169,17 @@ function get_func_block(code_block::CodeBlock, code_expr::Expr, layers::Vector{S
     return nothing
 end
 
-function get_func_block(code_block::CodeBlock, signature::Signature)::Union{Nothing, UnitRange{Int}}
-    parsed_expr::Expr = get_parsed_expr(code_block)
-    get_func_block(code_block, parsed_expr, signature.layers, 1)
+function get_func_block_range(code_block::CodeBlock, signature::Union{Nothing, Signature})::Union{Nothing, UnitRange{Int}}
+    if signature === nothing
+        1:length(split(code_block.code, LF))
+    else
+        parsed_expr::Expr = get_parsed_expr(code_block)
+        get_func_block(code_block, parsed_expr, signature.layers, 1)
+    end
 end
 
-function get_func_block(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
-    get_func_block(code_block, code_block.signature)
+function get_func_block_range(code_block::CodeBlock)::Union{Nothing, UnitRange{Int}}
+    get_func_block_range(code_block, code_block.signature)
 end
 
 function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})::String
@@ -197,9 +201,9 @@ function get_lines(code::String, range::UnitRange{Int}, skip_lines::Vector{Int})
 end
 
 """
-    code_block_with(; filepath::String, signature::Expr)::CodeBlock
+    code_block_with(; filepath::String, signature::Union{Nothing, Expr})::CodeBlock
 """
-function code_block_with(; filepath::String, signature::Expr)::CodeBlock
+function code_block_with(; filepath::String, signature::Union{Nothing, Expr})::CodeBlock
     code = read(filepath, String)
     filename = basename(filepath)
     CodeBlock(code, filename, signature)
@@ -215,8 +219,8 @@ function has_diff(src_block::CodeBlock,
                  dest_block::CodeBlock ;
                  show_diff::Bool = true,
                  skip_lines::@NamedTuple{src::Vector{Int}, dest::Vector{Int}} = (src = Int[], dest = Int[]))::Bool
-    src_range = get_func_block(src_block)
-    dest_range = get_func_block(dest_block)
+    src_range = get_func_block_range(src_block)
+    dest_range = get_func_block_range(dest_block)
     if src_range === nothing || dest_range === nothing
         throw(CodeBlockError(string("src: ", src_range, ", dest: ", dest_range)))
         return false

@@ -1,7 +1,7 @@
 module test_emojisymbols_show_limited
 
 using Test
-using SugarCubes: CodeBlock, code_block_with, get_func_block, has_diff
+using SugarCubes: CodeBlock, code_block_with, get_func_block_range, has_diff
 
 # from julia/stdlib/REPL/src/REPL.jl
 
@@ -28,7 +28,7 @@ end # module
 src_signature = :(module REPL function show_limited(io::IO, mime::MIME, x) end end)
 src_block = CodeBlock(src_code, "REPL.jl", src_signature)
 
-src_range = get_func_block(src_block)
+src_range = get_func_block_range(src_block)
 @test src_range !== nothing
 
 end # module test_emojisymbols_show_limited

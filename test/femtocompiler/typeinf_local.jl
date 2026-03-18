@@ -2,7 +2,7 @@ module test_femtocompiler_typeinf_local
 
 using Test
 using Pkg # Pkg.devdir
-using SugarCubes: code_block_with, remove_linenums_in_macrocall!, get_func_block, has_diff
+using SugarCubes: code_block_with, remove_linenums_in_macrocall!, get_func_block_range, has_diff
 
 src_path = "sources/Compiler/src/abstractinterpretation.jl"
 src_signature = :(function typeinf_local(interp::AbstractInterpreter, frame::InferenceState, nextresult::CurrentState) end)
@@ -19,7 +19,7 @@ dest_block = code_block_with(; filepath = dest_filepath, signature = dest_signat
 (depth, kind, sig) = src_block.signature.layers[end]
 @test sig == remove_linenums_in_macrocall!(:(function typeinf_local(interp::AbstractInterpreter, frame::InferenceState, nextresult::CurrentState) end))
 
-dest_range = get_func_block(dest_block)
+dest_range = get_func_block_range(dest_block)
 @test dest_range !== nothing
 
 @test has_diff(src_block, dest_block) === false

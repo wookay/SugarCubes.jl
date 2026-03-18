@@ -1,7 +1,7 @@
-module test_sugarcubes_get_func_block
+module test_sugarcubes_get_func_block_range
 
 using Test
-using SugarCubes: CodeBlock, to_signature, get_func_block
+using SugarCubes: CodeBlock, to_signature, get_func_block_range
 
 src_code = """
 function f(x::Int, y::Int)
@@ -13,10 +13,10 @@ end
 """
 src_signature = :(function f(x::Int, y::Int) end)
 src_block = CodeBlock(src_code, "src_code.jl", src_signature)
-@test get_func_block(src_block) == 2:2
+@test get_func_block_range(src_block) == 2:2
 
 src_signature = :(function f(x::MyInt, y::Int) end)
-@test get_func_block(src_block, to_signature(src_signature)) == 5:5
+@test get_func_block_range(src_block, to_signature(src_signature)) == 5:5
 
 src_code = """
 "doc"
@@ -30,7 +30,7 @@ end # module
 """
 src_signature = :(module REPL function show_limited(io::IO, mime::MIME, x) end end)
 src_block = CodeBlock(src_code, "src_code.jl", src_signature)
-@test get_func_block(src_block) == 5:5
+@test get_func_block_range(src_block) == 5:5
 
 src_code = """
 module REPL
@@ -41,7 +41,7 @@ end # module
 """
 src_signature = :(module REPL function show_limited(io::IO, mime::MIME, x) end end)
 src_block = CodeBlock(src_code, "src_code.jl", src_signature)
-@test get_func_block(src_block) == 3:3
+@test get_func_block_range(src_block) == 3:3
 
 src_code = """
 "doc"
@@ -55,7 +55,7 @@ end # module
 """
 src_signature = :(module Test macro test(ex, kws...) end end)
 src_block = CodeBlock(src_code, "src_code.jl", src_signature)
-@test get_func_block(src_block) == 5:5
+@test get_func_block_range(src_block) == 5:5
 
 src_code = """
 module Test
@@ -97,8 +97,8 @@ src_block = CodeBlock(src_code, "src_code.jl", src_signature)
 dest_signature = :(module TestExt if VERSION >= v"1.14.0-DEV.1453" elseif VERSION >= v"1.11" macro test(ex, kws::Expr...) end end end)
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
 
-@test get_func_block(src_block) == 4:12
-@test get_func_block(dest_block) == 5:13
+@test get_func_block_range(src_block) == 4:12
+@test get_func_block_range(dest_block) == 5:13
 
 dest_code = """
 if VERSION >= v"1.11.0-DEV.1432"
@@ -111,7 +111,7 @@ end
 """
 dest_signature = :(if VERSION >= v"1.11.0-DEV.1432" else function parse_bool_env(name::String, val::String = ENV[name]; throw::Bool=false)::Union{Nothing, Bool} end end)
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
-@test get_func_block(dest_block) == 5:5
+@test get_func_block_range(dest_block) == 5:5
 
 dest_code = """
 function bootstrap(io::IO)
@@ -125,6 +125,6 @@ end
 """
 dest_signature = :(function bootstrap(io::IO) end)
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
-@test get_func_block(dest_block) == 2:7
+@test get_func_block_range(dest_block) == 2:7
 
-end # module test_sugarcubes_get_func_block
+end # module test_sugarcubes_get_func_block_range
