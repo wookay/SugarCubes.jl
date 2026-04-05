@@ -2,13 +2,12 @@ module test_sugarcubes_syntax_graph
 
 using Test
 using JuliaSyntax: JuliaSyntax as JS
-using .JS: SourceFile
-using .JS: parsestmt, sourcefile, filename, source_location, source_line, sourcetext, highlight
+using .JS: SyntaxTree, NodeId, SourceFile, SyntaxNode
+using .JS: parsestmt, sourcefile, filename, source_location, source_line, sourcetext, highlight, to_expr
 
 # from  julia/JuliaSyntax/test/syntax_graph.jl
-using .JS: SyntaxTree
 st = parsestmt(SyntaxTree, "function foo end")
-@test st isa SyntaxTree{Dict{Symbol, Any}}
+@test st isa SyntaxTree{Dict{Symbol, Dict{NodeId, Any}}}
 @test sourcefile(st) isa SourceFile
 @test isempty(filename(st))
 @test source_location(st) == (1, 1)
@@ -17,7 +16,6 @@ st = parsestmt(SyntaxTree, "function foo end")
 highlight(devnull, st)
 
 # from  julia/JuliaSyntax/test/syntax_node.jl
-using .JS: SyntaxNode, to_expr
 t = parsestmt(SyntaxNode, "function foo end")
 @test source_location(t) == (1, 1)
 @test source_line(t) == 1
