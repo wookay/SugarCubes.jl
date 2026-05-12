@@ -93,7 +93,7 @@ function get_func_block(code_block::CodeBlock, code_expr::Expr, layers::Vector{S
         matched = matched_lines(code_block, code_expr, sig_expr)
         matched isa UnitRange{Int} && return matched
     elseif kind === K"macro"
-        if code_expr.head === :block
+        if code_expr.head === :block || code_expr.head === :toplevel
             for sub_macro in code_expr.args
                 if sub_macro isa Expr
                     if sub_macro.head === :macro

@@ -261,18 +261,47 @@ src_code = """
 module Test
 macro test(ex, kws...)
     result = quote
+    end
     ok
+end
+end
 """
 dest_code = """
 module TestExt
 macro test(ex, kws...)
     result = quote
+    end
     ok
+end
+end
 """
-src_block = CodeBlock(dest_code, "dest_code.jl", nothing)
-dest_block = CodeBlock(dest_code, "dest_code.jl", nothing)
+src_block = CodeBlock(src_code, "src_code.jl", :(module Test macro test(ex, kws...) end end))
+dest_block = CodeBlock(dest_code, "dest_code.jl", :(module TestExt macro test(ex, kws...) end end))
 src_range = get_func_block_range(src_block)
 dest_range = get_func_block_range(dest_block)
-@test src_range == dest_range == 1:5
+@test src_range == dest_range == 3:5
+
+src_code = """
+macro test(ex, kws...)
+    result = quote
+    end
+    ok
+end
+"""
+dest_code = """
+module TestExt
+macro test(ex, kws...)
+    result = quote
+    end
+    ok
+end
+end
+"""
+src_block = CodeBlock(src_code, "src_code.jl", :(macro test(ex, kws...) end))
+dest_block = CodeBlock(dest_code, "dest_code.jl", :(module TestExt macro test(ex, kws...) end end))
+src_range = get_func_block_range(src_block)
+dest_range = get_func_block_range(dest_block)
+@test src_range == 2:4
+@test dest_range == 3:5
 
 end # module test_sugarcubes_code_block
