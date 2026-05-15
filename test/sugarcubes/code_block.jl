@@ -304,4 +304,17 @@ dest_range = get_func_block_range(dest_block)
 @test src_range == 2:4
 @test dest_range == 3:5
 
+dest_code = """
+if VERSION >= v"1.9.0-DEV.1055"
+    blah
+else
+function _testset_context(args, ex, source)
+    args
+end
+end # if
+"""
+dest_block = CodeBlock(dest_code, "dest_code.jl", :(if VERSION >= v"1.9.0-DEV.1055" else function _testset_context(args, ex, source) end end))
+dest_range = get_func_block_range(dest_block)
+@test dest_range == 5:5
+
 end # module test_sugarcubes_code_block
