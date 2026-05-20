@@ -10,6 +10,8 @@
   - 👟 TestJiveRunMoreTests.jl  https://github.com/wookay/TestJiveRunMoreTests.jl/blob/main/gen/check_for_updates_using_sugar_cubes.jl
   - 🤔 EmojiSymbols.jl  https://github.com/wookay/EmojiSymbols.jl/blob/master/gen/check_for_updates_using_sugar_cubes.jl
   - 🚚 DumpTruck.jl  https://github.com/wookay/DumpTruck.jl/blob/main/gen/check_for_updates_using_sugar_cubes.jl
+  - ✈️  TestJETLS.jl  https://github.com/wookay/TestJETLS.jl/blob/main/gen/check_for_updates_using_sugar_cubes.jl
+  - 🚗 TestCompiler.jl  https://github.com/wookay/TestCompiler.jl/blob/main/gen/check_for_updates.jl
 
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
