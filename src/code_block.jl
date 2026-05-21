@@ -40,16 +40,36 @@ end
 
 const LF = "\n"
 
+function isvalid_signature(sig::String)::Bool
+    try
+        expr = Meta.parse(sig)
+        expr.head === :incomplete && return false
+    catch err
+        @assert err isa Meta.ParseError
+        return false
+    end
+    return true
+end
+
 function find_start_line(code::String, range::UnitRange{Int})::Int
     lines = split(code, LF)[range]
     for idx in 1:length(lines)
         sig = string(join(lines[1:idx], LF), " end")
-        expr = JS.fl_parseall(Expr, sig)
-        if expr.args[end].head !== :incomplete
-            return range.start + idx
-        end
+        isvalid_signature(sig) && return range.start + idx
     end
     return range.stop
+end
+
+function reduce_maxline(ex::Expr, maxline::Int)::Int
+    line = maxline
+    for node in ex.args
+        if node isa Expr
+            line = reduce_maxline(node, line)
+        elseif node isa LineNumberNode
+            line = node.line
+        end
+    end
+    return line
 end
 
 function matched_lines(code_block::CodeBlock, sub::Expr, sig_func::Expr)::Union{Nothing, UnitRange{Int}}
@@ -67,7 +87,7 @@ function matched_lines(code_block::CodeBlock, sub::Expr, sig_func::Expr)::Union{
             else
                 start_line = find_start_line(code_block.code, first_line:second_line)
             end
-            end_line = sub.args[2].args[end-1].line
+            end_line = reduce_maxline(sub, start_line)
             return start_line:end_line
         end
     end

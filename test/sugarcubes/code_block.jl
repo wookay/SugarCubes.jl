@@ -191,6 +191,7 @@ end
 """
 src_signature = :(function dump(io::IOContext, x::DataType, n::Int, indent) end)
 src_block = CodeBlock(src_code, "src_code.jl", src_signature)
+src_range = get_func_block_range(src_block)
 dest_code = """
 function dump_x(io::IOContext, x::DataType, n::Int, indent)
     if get(io, :PRINTED, :(unreachable)) === x
@@ -203,12 +204,9 @@ end
 """
 dest_signature = :(function dump_x(io::IOContext, x::DataType, n::Int, indent) end)
 dest_block = CodeBlock(dest_code, "dest_code.jl", dest_signature)
-src_range = get_func_block_range(src_block)
 dest_range = get_func_block_range(dest_block)
 skip_lines = (src = Int[], dest = vcat(1:3))
-src_code = get_lines(src_block.code, src_range, skip_lines.src)
-dest_code = get_lines(dest_block.code, dest_range, skip_lines.dest)
-@test has_diff(src_block, dest_block; skip_lines = (src = Int[], dest = vcat(1:3))) === false
+@test has_diff(src_block, dest_block; skip_lines) === false
 
 src_code = """
 module Test
@@ -316,5 +314,19 @@ end # if
 dest_block = CodeBlock(dest_code, "dest_code.jl", :(if VERSION >= v"1.9.0-DEV.1055" else function _testset_context(args, ex, source) end end))
 dest_range = get_func_block_range(dest_block)
 @test dest_range == 5:5
+
+# from julia/base/reflection.jl
+src_code = """
+function print_statement_costs(io::IO, @nospecialize(tt::Type);
+                               world::UInt=get_world_counter(),
+                               interp=nothing)
+    for match in matches.matches
+        println(match)
+    end
+end
+"""
+src_signature = :(function print_statement_costs(io::IO, @nospecialize(tt::Type); world::UInt=get_world_counter(), interp=nothing) end)
+src_block = CodeBlock(src_code, "src_code.jl", src_signature)
+@test get_func_block_range(src_block) == 4:6
 
 end # module test_sugarcubes_code_block
